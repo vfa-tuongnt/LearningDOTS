@@ -55,7 +55,8 @@ public partial class EnemySpawnerSystemEntity : SystemBase
 
         EntityQuery enemyQuery = EntityManager.CreateEntityQuery(typeof(EnemyTag));
         NativeArray<Entity> enemyArray = enemyQuery.ToEntityArray(Allocator.Temp);
-        enemySpawnerComponent = SystemAPI.GetSingletonRW<EnemySpawnerComponent>();
+        if (!SystemAPI.TryGetSingletonRW<EnemySpawnerComponent>(out enemySpawnerComponent))
+            return;
         randomComponent = SystemAPI.GetSingletonRW<RandomComponent>();
 
         EntityCommandBuffer beginBuffer = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
@@ -70,7 +71,6 @@ public partial class EnemySpawnerSystemEntity : SystemBase
             float x = math.cos(angle) * radius;
             float z = math.sin(angle) * radius;
             float3 position = _playerPosition + new float3(x, 0, z);
-            Debug.Log("Enemy Position: " + position);
             beginBuffer.SetComponent(enemyEntity, new LocalTransform
             {
                 Position = position,
