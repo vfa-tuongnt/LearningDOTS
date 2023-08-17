@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
@@ -17,78 +18,102 @@ public class A_Start_System : MonoBehaviour
     [SerializeField] List<Collider> _obstaclesColliders;
     private Node _endNode;
 
+    private List<Node> closeNodes = new List<Node>(); // Node already check
+    private List<Node> openNodes = new List<Node>();  // Node haven't check
+    private List<Node> path = new List<Node>();
+    private float playerRadius;
+    private float moveDistance = 0.3f;
+
     void Awake()
     {
         Instance = this; 
     }
 
-    public void FindPath(PlayerMovement playerMovement, CapsuleCollider playerCollider)
+    public List<Node> FindPath(PlayerMovement playerMovement, CapsuleCollider playerCollider)
     {
         // Debug.Log(FindCostDistance(playerMovement.transform.position, _endPoint.position));
         // Debug.Log(FindCostDistance(playerMovement.transform.position, _endPoint2.position));
 
-        var endPoint = _endPoint.position;
+        openNodes = new List<Node>();
+        closeNodes = new List<Node>();
+
         var startPoint = playerMovement.transform.position;
-        float moveDistance = playerCollider.radius;
-        List<Node> closeNodes = new List<Node>(); // Node already check
-        List<Node> openNodes = new List<Node>();  // Node haven't check
-        List<Node> route = new List<Node>();
+        playerRadius = playerCollider.radius + 1;
+         
 
         _endNode = new Node(_endPoint.position);
 
-        Node currentNode = new Node(startPoint);
-        route.Add(currentNode);
-        currentNode.h = FindCostDistance(currentNode, _endNode);
-        currentNode.g = 0;
+        Node startNode = new Node(startPoint);
+        startNode.ID = (0, 0);
+        startNode.h = FindCostDistance(startNode, _endNode);
+        startNode.g = 0;
 
-        FindNeighbors(currentNode, openNodes, closeNodes, moveDistance);
+        openNodes.Add(startNode);
 
-        if(openNodes.Count != 0 && _isReachTarget == false)
+        int loopLimit = 1000;
+        int loopTime = 0;
+
+        while(openNodes.Count > 0 && loopLimit > 0)
         {
-            currentNode = FindNextNode(route, closeNodes, openNodes, currentNode, moveDistance);
-        }
-        Debug.Log("Move distance: " + moveDistance);
-        Debug.Log("AAAA" + currentNode.position);
-        playerMovement.MovePlayer(currentNode.position);
-    }
-
-    private Node FindNextNode(List<Node> route, List<Node> closeNodes, List<Node> openNodes, Node currentNode, float moveDistance)
-    {
-        closeNodes.Add(currentNode);
-        Node bestNode = openNodes.GetRandom();
-        // Debug.Log(bestNode.f + ": best node");
-        foreach(Node node in openNodes)
-        {
-            // Debug.Log(node.f + ": node");
-
-            if (node.f <= bestNode.f)
+            loopTime++;
+            Node currentNode = openNodes[0];
+            foreach(Node child in openNodes)
             {
-                bestNode = node;
+                if(child.f < currentNode.f || child.f == currentNode.f && child.h < currentNode.h)
+                {
+                    // closer to the end node
+                    currentNode = child;
+                }
             }
-        }
-        if (bestNode == currentNode)
-        {
-            bestNode = openNodes.GetRandom();
-        }
-        if (Vector3.Distance(bestNode.position, _endNode.position) < 0.5f)
-        {
-            _isReachTarget = true;
-            bestNode = _endNode;
-        }
-        route.Add(bestNode);
-        Debug.Log(bestNode.position);
-        closeNodes.Add(bestNode);
-        openNodes.Remove(bestNode);
 
+            closeNodes.Add(currentNode);
+            openNodes.Remove(currentNode);
 
-        // Find 8 neighbors around the current Node
-        FindNeighbors(currentNode, openNodes, closeNodes, moveDistance);
-        return bestNode;
+            if(Vector3.Distance(currentNode.position,  _endPoint.position) < 2f)
+            {
+                // got to the end node
+                path = new List<Node>();
+                int count = 100;
+                while(currentNode != startNode && count > 0)
+                {
+                    path.Add(currentNode);
+                    currentNode = currentNode.connectedNode;
+                    count--;
+                    if(count == 0) Debug.Log("Can't found path");
+                }
+                Debug.Log("LoopTime: " + loopTime);
+                path.Reverse();
+                return path;
+            }
+            
+            foreach(var neighbor in FindNeighbors(currentNode, moveDistance))
+            {
+                if(IsBlock(neighbor)) continue;
+                if(IsInCloseNodes(neighbor)) continue;
+
+                bool isOpen = IsInOpenNodes(neighbor);
+                float costFromStartToNeighbor = currentNode.g + neighbor.g;
+
+                if(!isOpen || costFromStartToNeighbor < neighbor.g)
+                {
+                    neighbor.g = costFromStartToNeighbor;
+                    neighbor.connectedNode = currentNode;
+
+                    if(!isOpen)
+                    {
+                        openNodes.Add(neighbor);
+                    }
+                }                
+            }
+            loopLimit--;
+        }
+        Debug.Log("LoopTime: " + loopTime);
+        return null;
     }
 
-    private void FindNeighbors(Node currentNode, List<Node> openNodes, List<Node> closeNodes, float moveDistance)
+    private Node[] FindNeighbors(Node currentNode, float distance)
     {
-        (float, float)[] directions = 
+        (int, int)[] directions = 
         {
             (0, 1), // up
             (0, -1), // down
@@ -101,69 +126,92 @@ public class A_Start_System : MonoBehaviour
         };
         Node[] neighbors = new Node[8];
 
-        Debug.Log("Current node: " + currentNode.position);
+        // Debug.Log("Current node: " + currentNode.position);
         for(int i = 0; i < directions.Length; i++)
         {
-            neighbors[i] = new Node(currentNode.position + new float3(directions[i].Item1 * moveDistance, 0, directions[i].Item2 * moveDistance));
+            neighbors[i] = new Node(currentNode.position + new float3(directions[i].Item1 * distance, 0, directions[i].Item2 * distance));
+            neighbors[i].ID = ((currentNode.ID.Item1 + directions[i].Item1), (currentNode.ID.Item2 + directions[i].Item2));
             neighbors[i].g = FindCostDistance(neighbors[i], currentNode);
             neighbors[i].h = FindCostDistance(neighbors[i], _endNode);
-            Debug.Log("Neighbors: " + neighbors[i].position);
-            if(IsBlock(directions[i], currentNode)) continue;
-            if(IsInCloseNodes(neighbors[i], closeNodes)) continue;
-            openNodes.Add(neighbors[i]);
         }
+        return neighbors;
     }
-
-    private bool IsBlock((float, float) direction, Node testNode)
+    
+    private bool IsBlock(Node testNode)
     {
-        foreach(Collider col in _obstaclesColliders)
+        float3 center = testNode.position;
+        foreach(var neighbor in FindNeighbors(testNode, playerRadius))
         {
-            float3 temp = new float3(direction.Item1 * 0.6f, 0, direction.Item2 * 0.6f);
-            if (col.bounds.Contains(testNode.position + temp))
+            // Check if 8 directions is blocked
+            foreach(Collider col in _obstaclesColliders)
             {
-                return true;
+                if (col.bounds.Contains(neighbor.position))
+                {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    private bool IsInCloseNodes(Node node, List<Node> closeNodes)
+    private bool IsInCloseNodes(Node node)
     {
         foreach(var nod in closeNodes)
         {
-            if(nod.position.Equals(node.position))
+            if(nod.ID.Equals(node.ID))
             {
                 return true;
             }
         }
         return false;
+    }
+
+    private bool IsInOpenNodes(Node node)
+    {
+        foreach(var nod in openNodes)
+        {
+            if(nod.ID.Equals(node.ID))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Node GetNode((int, int) ID)
+    {
+        return openNodes.First(x => x.ID.Equals(ID));
     }
 
     public float FindCostDistance(Node currentNode, Node targetNode)
     {
         float xValue = math.abs((currentNode.position.x) - (targetNode.position.x));
         float zValue = math.abs((currentNode.position.z) - (targetNode.position.z));
-        float remaining = math.abs(xValue - zValue);
+        float horizontalMove = math.abs(xValue - zValue);
 
-        return DEFAULT_DIAGONAL_VALUE * math.min(xValue, zValue) + DEFAULT_STRAIGHT_VALUE * remaining;
+        return DEFAULT_DIAGONAL_VALUE * math.min(xValue, zValue) + DEFAULT_STRAIGHT_VALUE * horizontalMove;
     }
     
     public float FindCostDistance(float3 currentPosition, float3 targetPosition)
     {
         float xValue = math.abs((currentPosition.x) - (targetPosition.x));
         float zValue = math.abs((currentPosition.z) - (targetPosition.z));
-        float remaining = math.abs(xValue - zValue);
+        float horizontalMove = math.abs(xValue - zValue);
 
-        return DEFAULT_DIAGONAL_VALUE * math.abs(math.min(xValue, zValue)) + DEFAULT_STRAIGHT_VALUE * remaining;
+        return DEFAULT_DIAGONAL_VALUE * math.abs(math.min(xValue, zValue)) + DEFAULT_STRAIGHT_VALUE * horizontalMove;
     }
 }
 
 public class Node
 {
+    public (int, int) ID;
+    public Node connectedNode;
     public float3 position;
     public float g;
     public float h;
     public float f => g + h;
+
+    public Node(){}
 
     public Node(float3 position)
     {
