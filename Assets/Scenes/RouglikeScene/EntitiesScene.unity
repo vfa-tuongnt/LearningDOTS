@@ -242,6 +242,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 7142376437988917956, guid: 7ce5de95d9a0b437e814463138551f4d,
+        type: 3}
+      propertyPath: m_UseGravity
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7142376437988917956, guid: 7ce5de95d9a0b437e814463138551f4d,
+        type: 3}
+      propertyPath: m_IsKinematic
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8311963898522313428, guid: 7ce5de95d9a0b437e814463138551f4d,
         type: 3}
       propertyPath: m_RootOrder
@@ -325,7 +335,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 1
   m_StaticEditorFlags: 8
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1421195339
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -453,7 +463,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d425ec494896e478d8201dab22fbb503, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _enemyNumber: 2
+  _enemyNumber: 50
   enemyPref: {fileID: 1741028230066291377, guid: 2d03f0b9239184dc39007ce25a143a31,
     type: 3}
 --- !u!4 &1546316606
@@ -508,7 +518,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 1
   m_StaticEditorFlags: 8
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1715480886
 BoxCollider:
   m_ObjectHideFlags: 0

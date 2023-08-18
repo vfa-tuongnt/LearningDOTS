@@ -34,7 +34,7 @@ public readonly partial struct MovementTransformAndComponent : IAspect
     public void FaceToTarget(float3 dir)
     {
         float angle = math.atan2(dir.x, dir.z);
-        float angleDeg = math.degrees(angle);
+        // float angleDeg = math.degrees(angle);
 
         Quaternion qua = quaternion.Euler(0, angle, 0);
 
@@ -48,6 +48,6 @@ public readonly partial struct MovementTransformAndComponent : IAspect
 
     private bool IsGotToTarget()
     {
-        return math.distance(transform.ValueRO.Position, movementComponent.ValueRO.targetPosition) < 1f;
+        return math.distance(transform.ValueRW.Position, movementComponent.ValueRO.targetPosition) < 2f;
     }
 }

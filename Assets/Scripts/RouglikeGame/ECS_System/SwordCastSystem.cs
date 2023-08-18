@@ -4,7 +4,10 @@ using UnityEngine;
 using Unity.Entities;
 using Unity.Transforms;
 
-public class ECS_Start_Transform_Aspect : IAspect
+public partial class SwordCastSystem : SystemBase
 {
-    public readonly RefRW<LocalTransform> localTransform;
+    protected override void OnUpdate()
+    {
+        
+    }
 }

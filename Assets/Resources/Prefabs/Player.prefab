@@ -237,6 +237,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Maria Humannoid_GpuEcsAnimator
       objectReference: {fileID: 0}
+    - target: {fileID: 9104671229370360861, guid: 2cbda09a2edcf4ba796fe40d82d2984f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
