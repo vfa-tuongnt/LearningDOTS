@@ -3,6 +3,7 @@ namespace GPUECSAnimationBaker.Engine.AnimatorSystem
     public enum AnimationIdsGhoulZombie
     {
         Run = 0,
-        Attack1 = 1
+        Attack1 = 1,
+        Death = 2
     }
 }

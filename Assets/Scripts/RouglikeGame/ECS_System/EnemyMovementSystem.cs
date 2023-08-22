@@ -22,8 +22,12 @@ public partial class EnemyMovementSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        foreach(MovementTransformAndComponent movementTransformAndComponent in SystemAPI.Query<MovementTransformAndComponent>())
+        foreach((MovementTransformAndComponent movementTransformAndComponent, RefRW<EnemyAnimateComponent> enemyAnimateComponent) in SystemAPI.Query<MovementTransformAndComponent, RefRW<EnemyAnimateComponent>>())
         {
+            if(enemyAnimateComponent.ValueRW.isDead == true)
+            {
+                continue;
+            } 
             movementTransformAndComponent.Move(SystemAPI.Time.DeltaTime);
             movementTransformAndComponent.CheckReachTarget();
         }

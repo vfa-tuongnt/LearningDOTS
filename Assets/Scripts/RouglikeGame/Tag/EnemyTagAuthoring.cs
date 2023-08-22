@@ -5,10 +5,13 @@ using Unity.Entities;
 
 public class EnemyTagAuthoring : MonoBehaviour
 {
+    public GameObject parent;
 }
 
 public struct EnemyTag : IComponentData
 {
+    public Entity parent;
+    public float timer;
 }
 
 public class EnemyTagBaker : Baker<EnemyTagAuthoring>
@@ -17,6 +20,10 @@ public class EnemyTagBaker : Baker<EnemyTagAuthoring>
     {
         Entity entity = GetEntity(authoring, TransformUsageFlags.None);
 
-        AddComponent(entity, new EnemyTag());
+        AddComponent(entity, new EnemyTag
+        {
+            parent = GetEntity(authoring.parent, TransformUsageFlags.None),
+            timer = 0
+        });
     }
 }

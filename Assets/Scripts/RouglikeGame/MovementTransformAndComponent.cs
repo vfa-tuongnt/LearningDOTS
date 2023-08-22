@@ -7,7 +7,7 @@ using Unity.Entities;
 
 public readonly partial struct MovementTransformAndComponent : IAspect
 {
-    private readonly Entity entity; //Which entity is running this aspect
+    public readonly Entity entity; //Which entity is running this aspect
 
     public readonly RefRW<LocalTransform> transform;
     public readonly RefRW<EnemyMovementComponent> movementComponent;
@@ -30,6 +30,14 @@ public readonly partial struct MovementTransformAndComponent : IAspect
 
         }
     }
+
+    // public void DestroySelf()
+    // {
+    //     EntityCommandBuffer endBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
+    //         .CreateCommandBuffer(World.DefaultGameObjectInjectionWorld.Unmanaged);
+
+    //     endBuffer.DestroyEntity(entity);
+    // }
 
     public void FaceToTarget(float3 dir)
     {

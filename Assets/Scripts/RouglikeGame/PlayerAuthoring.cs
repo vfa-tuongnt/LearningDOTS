@@ -11,7 +11,7 @@ public class PlayerAuthoring : MonoBehaviour
 
 public struct PlayerComponent : IComponentData
 {
-    float3 faceDirection;
+    public float3 faceDirection;
 }
 
 public class PlayerComponentBaker : Baker<PlayerAuthoring>

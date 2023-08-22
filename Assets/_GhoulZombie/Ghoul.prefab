@@ -1030,6 +1030,22 @@ MonoBehaviour:
         nbrOfInBetweenSamples: 0
       additionalAnimatorParameterValues: []
       additionalAnimatorStatesPerLayer: []
+    - animationID: Death
+      animatorStateName: Death
+      animationType: 0
+      singleClipData:
+        animationClip: {fileID: 7400010, guid: ce65fa103f0e84b4289374b2a4bf93f8, type: 3}
+      dualClipBlendData:
+        blendParameterName: 
+        clip1:
+          parameterValue: 0
+          animationClip: {fileID: 0}
+        clip2:
+          parameterValue: 0
+          animationClip: {fileID: 0}
+        nbrOfInBetweenSamples: 0
+      additionalAnimatorParameterValues: []
+      additionalAnimatorStatesPerLayer: []
     generateAnimationIdsEnum: 1
     animationIdsEnumName: GhoulZombie
     boneUsage:
