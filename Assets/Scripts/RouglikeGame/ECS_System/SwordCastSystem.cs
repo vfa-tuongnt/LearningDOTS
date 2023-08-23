@@ -13,12 +13,13 @@ using GPUECSAnimationBaker.Engine.AnimatorSystem;
 [UpdateBefore(typeof(PhysicsSystemGroup))] // Make sure that the running order of systems is correct
 public partial class SwordCastSystem : SystemBase
 {
-    private float attackCooldown = 1.5f;
-    private float attackRange = 3f;
-    private float attackPrepare = .5f;
+    private float attackCooldown = 0.12f;
+    private float attackRange = .5f;
+    private float attackPrepare = 0f;
     private bool isAttacking;
     private float nextAttackTime;
     private float nextAttackEndTime;
+    RefRW<RandomComponent> randomComponent;
 
     protected override void OnStartRunning()
     {
@@ -33,7 +34,7 @@ public partial class SwordCastSystem : SystemBase
         }
     }
 
-    private unsafe void Attack()
+    private void Attack()
     {
         nextAttackTime = (float)SystemAPI.Time.ElapsedTime;
         // nextAttackEndTime = (float)SystemAPI.Time.ElapsedTime + attackDuration;
@@ -44,14 +45,14 @@ public partial class SwordCastSystem : SystemBase
         float3 playerFaceDir = playerComponent.ValueRW.faceDirection;
 
         //TODO: Create a sphere collision 
-        float3 origin = new float3(1, 0, 1) * playerFaceDir;
+        float3 origin = new float3(1.5f, 0, 1.5f) * playerFaceDir;
         float radius = attackRange;
         float3 direction = playerFaceDir;
         float maxDistance = 10f;
         var filter = new CollisionFilter()
         {
             BelongsTo = 1u << 6,
-            CollidesWith = 1u << 6, // all 1s, so all layers, collide with everything
+            CollidesWith = 1u << 6, 
             GroupIndex = 0
         };
         CollisionWorld collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
@@ -61,6 +62,9 @@ public partial class SwordCastSystem : SystemBase
 
         bool isHit = collisionWorld.SphereCastAll(playerFaceDir, radius, direction, maxDistance, ref hits, filter);
 
+        EntityCommandBuffer entityCommandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+
+        randomComponent = SystemAPI.GetSingletonRW<RandomComponent>();
         if(isHit == true)
         {
             foreach(var hit in hits)
@@ -68,6 +72,20 @@ public partial class SwordCastSystem : SystemBase
                 RefRW<EnemyAnimateComponent> enemy = SystemAPI.GetComponentRW<EnemyAnimateComponent>(hit.Entity);
                 enemy.ValueRW.isDead = true;
                 enemy.ValueRW.animationID = AnimationIdsGhoulZombie.Death;
+                EntityManager.RemoveComponent<PhysicsCollider>(hit.Entity);
+
+                Entity enemyEntity = hit.Entity;
+
+                // float animationDelay = randomComponent.ValueRW.random.NextFloat(1, 2.5f);
+                // float deadTimer = randomComponent.ValueRW.random.NextFloat(0, 0.5f);
+
+                // entityCommandBuffer.SetComponent(enemyEntity, new EnemyTag
+                // {
+                //     parent = hit.Entity,
+                //     animationDelay = animationDelay,
+                //     deadTimer = deadTimer,
+                //     isBeginDeadAnim = false,
+                // });
             }
         } 
 

@@ -10,12 +10,19 @@ public partial class EnemyAnimationSystem : SystemBase
     {
         var enemyAnimationComponents = GetComponentLookup<EnemyAnimateComponent>();
 
-        Entities.ForEach((GpuEcsAnimatorAspect gpuEcsAnimatorAspect, EnemyTag enemy) =>
+        foreach ((GpuEcsAnimatorAspect gpuEcsAnimatorAspect, EnemyTag enemy) in SystemAPI.Query<GpuEcsAnimatorAspect, EnemyTag>())
         {
             EnemyAnimateComponent enemyAnimate = enemyAnimationComponents[enemy.parent];
-            // Debug.Log("AnimationID: " + (int)enemyAnimate.animationID);
-            int animationId = (int)enemyAnimate.animationID;
-            gpuEcsAnimatorAspect.RunAnimation(animationId);
-        }).WithoutBurst().Run();
+            RefRW<EnemyTag> parentEnemyTag = SystemAPI.GetComponentRW<EnemyTag>(enemy.parent);
+            if (enemyAnimate.isDead)
+            {
+                parentEnemyTag.ValueRW.animationTimer += SystemAPI.Time.DeltaTime;
+                if (parentEnemyTag.ValueRW.animationTimer >= parentEnemyTag.ValueRW.animationDelay)
+                {
+                    int animationId = (int)enemyAnimate.animationID;
+                    gpuEcsAnimatorAspect.RunAnimation(animationId);
+                }
+            }
+        }
     }
 }

@@ -12,6 +12,9 @@ public struct EnemyTag : IComponentData
 {
     public Entity parent;
     public float timer;
+    public float deadTimer;
+    public float animationTimer;
+    public float animationDelay;
 }
 
 public class EnemyTagBaker : Baker<EnemyTagAuthoring>

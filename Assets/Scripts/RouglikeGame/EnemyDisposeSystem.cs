@@ -1,12 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Physics;
 using Unity.Entities;
+using Unity.Physics.Systems;
 
 public partial class EnemyDisposeSystem : SystemBase
 {
-    float deadTimer = 1f;
-
     protected override void OnUpdate()
     {
         foreach((RefRW<EnemyTag> enemyTag, RefRW<EnemyAnimateComponent> enemyAnimateComponent) in SystemAPI.Query<RefRW<EnemyTag>, RefRW<EnemyAnimateComponent>>()) 
@@ -14,7 +14,7 @@ public partial class EnemyDisposeSystem : SystemBase
             if (enemyAnimateComponent.ValueRW.isDead == true)
             {
                 enemyTag.ValueRW.timer += SystemAPI.Time.DeltaTime;
-                if (enemyTag.ValueRW.timer >= deadTimer)
+                if (enemyTag.ValueRW.timer >= enemyTag.ValueRW.deadTimer)
                 {
                     DestroyEnemy(enemyTag.ValueRW.parent);
                 }

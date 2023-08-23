@@ -71,6 +71,17 @@ public partial class EnemySpawnerSystemEntity : SystemBase
             float x = math.cos(angle) * radius;
             float z = math.sin(angle) * radius;
             float3 position = _playerPosition + new float3(x, 0, z);
+
+            float animationDelay = randomComponent.ValueRW.random.NextFloat(0, .5f);
+            float deadTimer = animationDelay + 1f;
+
+            beginBuffer.SetComponent(enemyEntity, new EnemyTag
+            {
+                parent = enemyEntity,
+                animationDelay = animationDelay,
+                deadTimer = deadTimer,
+            });
+
             beginBuffer.SetComponent(enemyEntity, new LocalTransform
             {
                 Position = position,
