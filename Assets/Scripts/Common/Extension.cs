@@ -22,6 +22,16 @@ namespace Extension
         {
             return new Vector3(source.x, source.y, source.z);
         }
+
+        public static float3 ToFloat3XZ(this Vector2Int source)
+        {
+            return new float3(source.x, 0, source.y);
+        }
+
+        public static float3 ToFloat3XZ(this float2 source)
+        {
+            return new float3(source.x, 0, source.y);
+        }
     }
 
 }

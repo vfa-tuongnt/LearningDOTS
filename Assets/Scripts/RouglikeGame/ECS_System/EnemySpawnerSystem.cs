@@ -39,60 +39,26 @@ public partial class EnemySpawnerSystemEntity : SystemBase
     public RefRW<EnemySpawnerComponent> enemySpawnerComponent;
     float3 _playerPosition = new float3(0, 0, 0);
 
-    protected override void OnStartRunning()
-    {
-        Entities.ForEach((Entity entity, ref LocalTransform localTransform, ref PlayerTag playerTag) =>
-        {
-            if(SystemAPI.HasComponent<PlayerTag>(entity))
-            {
-                _playerPosition = localTransform.Position;
-            }
-        }).WithoutBurst().Run();
-    }
-
     protected override void OnUpdate()
     {
-
-        EntityQuery enemyQuery = EntityManager.CreateEntityQuery(typeof(EnemyTag));
-        NativeArray<Entity> enemyArray = enemyQuery.ToEntityArray(Allocator.Temp);
-        if (!SystemAPI.TryGetSingletonRW<EnemySpawnerComponent>(out enemySpawnerComponent))
-            return;
-        randomComponent = SystemAPI.GetSingletonRW<RandomComponent>();
-
-        EntityCommandBuffer beginBuffer = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
-        EntityCommandBuffer endBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
-
-        Entity enemyPref = enemySpawnerComponent.ValueRO._enemyPrefab;
-        if(enemyArray.Length < enemySpawnerComponent.ValueRO._enemyNumber)
+        if(Input.GetKeyDown(KeyCode.Alpha1))
         {
-            Entity enemyEntity = beginBuffer.Instantiate(enemyPref);
-            float angle = randomComponent.ValueRW.random.NextFloat(0, 360f);
-            float radius = 15f;
-            float x = math.cos(angle) * radius;
-            float z = math.sin(angle) * radius;
-            float3 position = _playerPosition + new float3(x, 0, z);
+            enemySpawnerComponent = SystemAPI.GetSingletonRW<EnemySpawnerComponent>();
 
-            float animationDelay = randomComponent.ValueRW.random.NextFloat(0, .5f);
-            float deadTimer = animationDelay + 1f;
+            EntityCommandBuffer beginBuffer = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+            for (int i = 0; i < 5; i++)
+            {
+                Entity enemy = beginBuffer.Instantiate(enemySpawnerComponent.ValueRW._enemyPrefab);
 
-            beginBuffer.SetComponent(enemyEntity, new EnemyTag
-            {
-                parent = enemyEntity,
-                animationDelay = animationDelay,
-                deadTimer = deadTimer,
-            });
+                float3 newPosition = GridController.Instance.curFlowField.GetRandomCellPosition();
+                newPosition.y = 0;
 
-            beginBuffer.SetComponent(enemyEntity, new LocalTransform
-            {
-                Position = position,
-                Scale = 1,
-                Rotation = quaternion.identity
-            });
-            beginBuffer.SetComponent(enemyEntity, new EnemyMovementComponent
-            {
-                speed = 2,
-                targetPosition = _playerPosition
-            });
+                beginBuffer.SetComponent(enemy, new LocalTransform{
+                    Position = newPosition,
+                    Scale = 1,
+                    Rotation = quaternion.identity
+                });
+            }
         }
     }
 }

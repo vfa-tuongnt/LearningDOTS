@@ -4,6 +4,8 @@ using UnityEngine;
 using Unity.Mathematics;
 using Unity.Transforms;
 using Unity.Entities;
+using Unity.Physics;
+using Extension;
 
 public readonly partial struct MovementTransformAndComponent : IAspect
 {
@@ -11,15 +13,29 @@ public readonly partial struct MovementTransformAndComponent : IAspect
 
     public readonly RefRW<LocalTransform> transform;
     public readonly RefRW<EnemyMovementComponent> movementComponent;
+    public readonly RefRW<UnitPositionComponent> unitPositionComponent;
+    public readonly RefRW<PhysicsVelocity> physicVelocity;
 
 
     public void Move(float deltaTime)
     {
-        if(IsGotToTarget()) return;
-        movementComponent.ValueRW.targetPosition.y = transform.ValueRO.Position.y;
-        float3 dir = math.normalize(movementComponent.ValueRO.targetPosition - transform.ValueRW.Position);
+        // if(IsGotToTarget()) return;
+
+        // movementComponent.ValueRW.targetPosition.y = transform.ValueRO.Position.y;
+        // float3 dir = math.normalize(movementComponent.ValueRO.targetPosition - transform.ValueRW.Position);
+        // FaceToTarget(dir);
+        // transform.ValueRW.Position += dir * deltaTime * movementComponent.ValueRO.speed;
+
+        float3 dir = unitPositionComponent.ValueRW.direction.ToFloat3XZ();
         FaceToTarget(dir);
-        transform.ValueRW.Position += dir * deltaTime * movementComponent.ValueRO.speed;
+        
+        physicVelocity.ValueRW.Linear = dir * movementComponent.ValueRO.speed;
+        unitPositionComponent.ValueRW.position = transform.ValueRW.Position;
+    }
+
+    public void Stop()
+    {
+        physicVelocity.ValueRW.Linear = new float3(0, 0, 0);
     }
 
     public void CheckReachTarget()
@@ -37,6 +53,7 @@ public readonly partial struct MovementTransformAndComponent : IAspect
     //         .CreateCommandBuffer(World.DefaultGameObjectInjectionWorld.Unmanaged);
 
     //     endBuffer.DestroyEntity(entity);
+    //     endBuffer.Dispose();
     // }
 
     public void FaceToTarget(float3 dir)

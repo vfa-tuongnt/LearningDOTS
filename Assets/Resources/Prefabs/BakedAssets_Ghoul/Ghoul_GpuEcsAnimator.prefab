@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4056969447616489459}
   - component: {fileID: 5797854214683855654}
   - component: {fileID: 5703013288918216438}
+  - component: {fileID: 9143868349328614770}
   m_Layer: 0
   m_Name: Ghoul_Tube1
   m_TagString: Untagged
@@ -26,13 +27,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2079959441068899142}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0, y: 42.5705, z: -1.0705005}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6495158301554122192}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4056969447616489459
 MeshFilter:
@@ -98,6 +99,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 1153247828279096798}
   transformUsageFlags: 1
+--- !u!114 &9143868349328614770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2079959441068899142}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c39229bcced6433591da1193ffe7e96, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent: {fileID: 4552503904681639100}
 --- !u!1 &4552503904681639100
 GameObject:
   m_ObjectHideFlags: 0
@@ -109,7 +123,7 @@ GameObject:
   - component: {fileID: 6495158301554122192}
   - component: {fileID: 1053039394146457854}
   - component: {fileID: 1153247828279096798}
-  m_Layer: 6
+  m_Layer: 8
   m_Name: Ghoul_GpuEcsAnimator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -123,14 +137,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4552503904681639100}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.66, y: 0.6600001, z: 0.6600001}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7601947462791642116}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1053039394146457854
 MonoBehaviour:

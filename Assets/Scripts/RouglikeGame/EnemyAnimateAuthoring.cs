@@ -21,7 +21,7 @@ public class EnemyAnimateBaker : Baker<EnemyAnimateAuthoring>
 {
     public override void Bake(EnemyAnimateAuthoring authoring)
     {
-        Entity entity = GetEntity(authoring, TransformUsageFlags.None);
+        Entity entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
 
         AddComponent(entity, new EnemyAnimateComponent
         {

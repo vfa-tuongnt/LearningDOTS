@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
+using Extension;
 
 public readonly partial struct ECS_Player_Transform_Aspect : IAspect
 {
@@ -11,6 +12,11 @@ public readonly partial struct ECS_Player_Transform_Aspect : IAspect
 
     public readonly RefRW<PlayerTag> _playerTag;
     public readonly RefRW<LocalTransform> _localTransform;
+
+    public void Move(float2 direction, float speed, float deltaTime)
+    {
+        _localTransform.ValueRW.Position += direction.ToFloat3XZ() * speed * deltaTime;
+    }
 
     public void FaceToTargetPos(float3 target)
     {

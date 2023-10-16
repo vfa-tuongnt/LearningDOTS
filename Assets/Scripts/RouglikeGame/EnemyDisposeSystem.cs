@@ -13,8 +13,8 @@ public partial class EnemyDisposeSystem : SystemBase
         {
             if (enemyAnimateComponent.ValueRW.isDead == true)
             {
-                enemyTag.ValueRW.timer += SystemAPI.Time.DeltaTime;
-                if (enemyTag.ValueRW.timer >= enemyTag.ValueRW.deadTimer)
+                enemyTag.ValueRW.deadTimer += SystemAPI.Time.DeltaTime;
+                if (enemyTag.ValueRW.deadTimer >= enemyTag.ValueRW.deadDelay)
                 {
                     DestroyEnemy(enemyTag.ValueRW.parent);
                 }

@@ -6,12 +6,15 @@ using UnityEngine;
 public class RandomAuthoring : MonoBehaviour
 {
 }
-
+public struct RandomComponent : IComponentData
+{
+    public Unity.Mathematics.Random random;
+}
 public class RandomAuthoringBacker : Baker<RandomAuthoring>
 {
     public override void Bake(RandomAuthoring authoring)
     {
-        Entity entity = this.GetEntity(authoring, TransformUsageFlags.None);
+        Entity entity = GetEntity(authoring, TransformUsageFlags.None);
 
         AddComponent(entity, new RandomComponent
         {

@@ -10,10 +10,10 @@ public partial class EnemyAnimationSystem : SystemBase
     {
         var enemyAnimationComponents = GetComponentLookup<EnemyAnimateComponent>();
 
-        foreach ((GpuEcsAnimatorAspect gpuEcsAnimatorAspect, EnemyTag enemy) in SystemAPI.Query<GpuEcsAnimatorAspect, EnemyTag>())
+        foreach ((GpuEcsAnimatorAspect gpuEcsAnimatorAspect, RefRW<EnemyTag> enemy) in SystemAPI.Query<GpuEcsAnimatorAspect, RefRW<EnemyTag>>())
         {
-            EnemyAnimateComponent enemyAnimate = enemyAnimationComponents[enemy.parent];
-            RefRW<EnemyTag> parentEnemyTag = SystemAPI.GetComponentRW<EnemyTag>(enemy.parent);
+            EnemyAnimateComponent enemyAnimate = enemyAnimationComponents[enemy.ValueRW.parent];
+            RefRW<EnemyTag> parentEnemyTag = SystemAPI.GetComponentRW<EnemyTag>(enemy.ValueRW.parent);
             if (enemyAnimate.isDead)
             {
                 parentEnemyTag.ValueRW.animationTimer += SystemAPI.Time.DeltaTime;

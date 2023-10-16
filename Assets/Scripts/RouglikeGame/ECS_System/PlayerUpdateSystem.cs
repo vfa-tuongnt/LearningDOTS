@@ -25,47 +25,10 @@ public partial class PlayerUpdateSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        // if((float) SystemAPI.Time.ElapsedTime >= nextAttackTime)
-        // {
-        //     Attack();
-        // }
-        // if ((float)SystemAPI.Time.ElapsedTime >= nextAttackEndTime)
-        // {
-        //     isAttacking = false;
-        // }
+        // Loop all the enemy to get the direction to the closest one
         LoopAllEnemies();
     }
 
-    // private unsafe void Attack()
-    // {
-    //     nextAttackEndTime = (float)SystemAPI.Time.ElapsedTime + attackDuration;
-    //     nextAttackTime = nextAttackEndTime + attackCooldown * 2; // prepare for attack and after attack
-    //     isAttacking = true;
-    //     //TODO: Create a sphere collision 
-    //     float3 origin = new float3(0, 0, 0);
-    //     float radius = attackRange;
-    //     float3 direction = playerFaceDir;
-    //     float maxDistance = 10f;
-    //     var filter = new CollisionFilter()
-    //     {
-    //         BelongsTo = ~0u,
-    //         CollidesWith = ~0u, // all 1s, so all layers, collide with everything
-    //         GroupIndex = 0
-    //     };
-    //     CollisionWorld collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
-        
-    //     // Cast and check sphere collision 
-    //     NativeList<ColliderCastHit> hits = new NativeList<ColliderCastHit>();
-    //     ColliderCastHit hitInfo = new ColliderCastHit();
-
-    //     bool isHit = collisionWorld.SphereCastAll(playerFaceDir * 1, attackRange, direction, maxDistance, ref hits, filter);
-
-    //     if(isHit == true)
-    //     {
-    //         Debug.Log(hits.Length);
-    //         Debug.Log(hits.ElementAt(2).Entity.Index);
-    //     } 
-    // }
 
     private void LoopAllEnemies()
     {
@@ -90,6 +53,7 @@ public partial class PlayerUpdateSystem : SystemBase
                     playerComponent.ValueRW.faceDirection = enemyDir;
                 }
             }
+            playerComponent.ValueRW.position = playerTransformAspect._localTransform.ValueRW.Position;
             playerTransformAspect.FaceToDirection(dir);
         }
     }

@@ -11,8 +11,8 @@ public class EnemyTagAuthoring : MonoBehaviour
 public struct EnemyTag : IComponentData
 {
     public Entity parent;
-    public float timer;
     public float deadTimer;
+    public float deadDelay;
     public float animationTimer;
     public float animationDelay;
 }
@@ -26,7 +26,8 @@ public class EnemyTagBaker : Baker<EnemyTagAuthoring>
         AddComponent(entity, new EnemyTag
         {
             parent = GetEntity(authoring.parent, TransformUsageFlags.None),
-            timer = 0
+            deadTimer = 0,
+            animationTimer = 0
         });
     }
 }
