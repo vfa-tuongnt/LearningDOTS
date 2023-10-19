@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Entities;
-using UnityEditor.Experimental.GraphView;
 
 public class FlowField 
 {

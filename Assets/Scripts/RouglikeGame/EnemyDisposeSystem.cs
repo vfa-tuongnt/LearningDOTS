@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Physics;
 using Unity.Entities;
-using Unity.Physics.Systems;
+using Unity.Jobs;
+using Unity.Burst;
 
 public partial class EnemyDisposeSystem : SystemBase
 {
@@ -16,16 +17,31 @@ public partial class EnemyDisposeSystem : SystemBase
                 enemyTag.ValueRW.deadTimer += SystemAPI.Time.DeltaTime;
                 if (enemyTag.ValueRW.deadTimer >= enemyTag.ValueRW.deadDelay)
                 {
-                    DestroyEnemy(enemyTag.ValueRW.parent);
+                    EndInitializationEntityCommandBufferSystem endInitializationECBSystem = World.GetOrCreateSystemManaged<EndInitializationEntityCommandBufferSystem>();
+
+                    EntityCommandBuffer.ParallelWriter entityParallelBuffer = endInitializationECBSystem.CreateCommandBuffer().AsParallelWriter();
+
+                    JobHandle DisposeJob = new DisposeEnemyJob
+                    {
+                        enemy = enemyTag.ValueRW.parent,
+                        parallelWriter = entityParallelBuffer
+                    }.Schedule(this.Dependency);
+                    endInitializationECBSystem.AddJobHandleForProducer(DisposeJob);
+                    DisposeJob.Complete();
                 }
             }
         }
     }
 
-    void DestroyEnemy(Entity entity)
+    [BurstCompile]
+    public struct DisposeEnemyJob : IJob
     {
-        EntityCommandBuffer endCommandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+        public Entity enemy;
+        public EntityCommandBuffer.ParallelWriter parallelWriter;
 
-        endCommandBuffer.DestroyEntity(entity);
+        public void Execute()
+        {
+            parallelWriter.DestroyEntity(2, enemy);
+        }
     }
 }

@@ -30,6 +30,7 @@ public class GridController : MonoBehaviour
     void Awake()
     {
         _instance = this;
+        Application.targetFrameRate = 60;
     }
 
     void Start()

@@ -4,13 +4,20 @@ using Unity.Mathematics;
 
 public partial class CameraMovementSystem : SystemBase
 {
+
+    protected override void OnCreate()
+    {
+    }
+
     protected override void OnUpdate()
     {
-        RefRW<PlayerComponent> playerComponent = SystemAPI.GetSingletonRW<PlayerComponent>();
-        float3 position = playerComponent.ValueRW.position;
-        Entities.ForEach((ref CameraComponent cameraComponent) =>
+        if (SystemAPI.TryGetSingletonRW<PlayerComponent>(out RefRW<PlayerComponent> playerComponent))
         {
-            Camera.main.transform.position = position + cameraComponent.offset;
-        }).Run();
+            float3 position = playerComponent.ValueRW.position;
+            GameObject camera = Camera.main.gameObject;
+            if (camera == null) return;
+            CameraComponent cameraComponent = SystemAPI.GetSingleton<CameraComponent>();
+            camera.transform.position = position + cameraComponent.offset;
+        }
     }
 }

@@ -168,7 +168,7 @@ public class GridDebug : MonoBehaviour
  
                 foreach (Cell curCell in curFlowField.Grid)
                 {
-                    Handles.Label(curCell.worldPos, curCell.cost.ToString(), style);
+                    // Handles.Label(curCell.worldPos, curCell.cost.ToString(), style);
                 }
                 break;
                 
@@ -176,7 +176,7 @@ public class GridDebug : MonoBehaviour
  
                 foreach (Cell curCell in curFlowField.Grid)
                 {
-                    Handles.Label(curCell.worldPos, curCell.bestCost.ToString(), style);
+                    // Handles.Label(curCell.worldPos, curCell.bestCost.ToString(), style);
                 }
                 break;
                 

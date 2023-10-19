@@ -26,7 +26,7 @@ public partial class PlayerMovementSystem : SystemBase
             Entities.ForEach((ECS_Player_Transform_Aspect player_Transform_Aspect) =>
             {
                 player_Transform_Aspect.Move(movement, 5, SystemAPI.Time.DeltaTime);
-            }).ScheduleParallel();
+            }).Run();
         }
     }
 }

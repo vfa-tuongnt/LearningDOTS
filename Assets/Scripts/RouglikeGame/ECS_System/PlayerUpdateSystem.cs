@@ -36,25 +36,26 @@ public partial class PlayerUpdateSystem : SystemBase
         float3 dir = new Vector3();
 
         EntityCommandBuffer endBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
-        RefRW<PlayerComponent> playerComponent = SystemAPI.GetSingletonRW<PlayerComponent>();
-
-        foreach(ECS_Player_Transform_Aspect playerTransformAspect in SystemAPI.Query<ECS_Player_Transform_Aspect>())
+        if(SystemAPI.TryGetSingletonRW<PlayerComponent>(out RefRW<PlayerComponent> playerComponent))
         {
-            foreach((ECS_Enemy_Transform_Aspect enemyTransformAspect, RefRW<EnemyAnimateComponent> enemyAnimation) in SystemAPI.Query<ECS_Enemy_Transform_Aspect, RefRW<EnemyAnimateComponent>>())
+            foreach(ECS_Player_Transform_Aspect playerTransformAspect in SystemAPI.Query<ECS_Player_Transform_Aspect>())
             {
-                if(enemyAnimation.ValueRW.isDead == true) continue;
-
-                float distance = math.distance(enemyTransformAspect._localTransform.ValueRW.Position, playerTransformAspect._localTransform.ValueRW.Position);
-                float3 enemyDir = math.normalize(enemyTransformAspect._localTransform.ValueRW.Position - playerTransformAspect._localTransform.ValueRW.Position);
-                if(distance < closestDistance) 
+                foreach((ECS_Enemy_Transform_Aspect enemyTransformAspect, RefRW<EnemyAnimateComponent> enemyAnimation) in SystemAPI.Query<ECS_Enemy_Transform_Aspect, RefRW<EnemyAnimateComponent>>())
                 {
-                    closestDistance = distance;
-                    dir = enemyDir;
-                    playerComponent.ValueRW.faceDirection = enemyDir;
+                    if(enemyAnimation.ValueRW.isDead == true) continue;
+
+                    float distance = math.distance(enemyTransformAspect._localTransform.ValueRW.Position, playerTransformAspect._localTransform.ValueRW.Position);
+                    float3 enemyDir = math.normalize(enemyTransformAspect._localTransform.ValueRW.Position - playerTransformAspect._localTransform.ValueRW.Position);
+                    if(distance < closestDistance) 
+                    {
+                        closestDistance = distance;
+                        dir = enemyDir;
+                        playerComponent.ValueRW.faceDirection = enemyDir;
+                    }
                 }
+                playerComponent.ValueRW.position = playerTransformAspect._localTransform.ValueRW.Position;
+                playerTransformAspect.FaceToDirection(dir);
             }
-            playerComponent.ValueRW.position = playerTransformAspect._localTransform.ValueRW.Position;
-            playerTransformAspect.FaceToDirection(dir);
         }
     }
 

@@ -6,6 +6,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Collections;
 using Unity.Transforms;
+using Unity.Jobs;
 
 public class EnemySpawnerSystem : MonoBehaviour
 {
@@ -38,27 +39,57 @@ public partial class EnemySpawnerSystemEntity : SystemBase
     public RefRW<RandomComponent> randomComponent;
     public RefRW<EnemySpawnerComponent> enemySpawnerComponent;
     float3 _playerPosition = new float3(0, 0, 0);
+    FlowField flowField;
+
+    protected override void OnCreate()
+    {
+    }
 
     protected override void OnUpdate()
     {
         if(Input.GetKeyDown(KeyCode.Alpha1))
         {
+            flowField = GridController.Instance.curFlowField;
             enemySpawnerComponent = SystemAPI.GetSingletonRW<EnemySpawnerComponent>();
 
             EntityCommandBuffer beginBuffer = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+
+            BeginInitializationEntityCommandBufferSystem beginInitializationECBSystem = World.GetOrCreateSystemManaged<BeginInitializationEntityCommandBufferSystem>();
+
+            EntityCommandBuffer.ParallelWriter entityParallelBuffer = beginInitializationECBSystem.CreateCommandBuffer().AsParallelWriter();
             for (int i = 0; i < 5; i++)
             {
-                Entity enemy = beginBuffer.Instantiate(enemySpawnerComponent.ValueRW._enemyPrefab);
-
-                float3 newPosition = GridController.Instance.curFlowField.GetRandomCellPosition();
+                float3 newPosition = flowField.GetRandomCellPosition();
                 newPosition.y = 0;
 
-                beginBuffer.SetComponent(enemy, new LocalTransform{
-                    Position = newPosition,
-                    Scale = 1,
-                    Rotation = quaternion.identity
-                });
+                JobHandle SpawnJob = new SpawnEnemyJob
+                {
+                    beginBuffer = entityParallelBuffer,
+                    enemyPrefab = enemySpawnerComponent.ValueRW._enemyPrefab,
+                    position = newPosition
+                }.Schedule(this.Dependency);
+                beginInitializationECBSystem.AddJobHandleForProducer(SpawnJob);
+                SpawnJob.Complete();
             }
+        }
+    }
+
+    [BurstCompile]
+    public struct SpawnEnemyJob : IJob
+    {
+        public EntityCommandBuffer.ParallelWriter beginBuffer;
+        public Entity enemyPrefab;
+        public float3 position;
+
+        public void Execute()
+        {
+            Entity enemy =  beginBuffer.Instantiate(1, enemyPrefab);
+
+            beginBuffer.SetComponent(1, enemy, new LocalTransform{
+                Position = position,
+                Scale = 1,
+                Rotation = quaternion.identity
+            });
         }
     }
 }
