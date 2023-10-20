@@ -40,12 +40,6 @@ public class UIManager : MonoBehaviour
                 LoadToNormalScene?.Invoke();
 
                 var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-                // for(int i = 0; i < scenes.Length; i++)
-                // {
-                //     SceneSystem.UnloadScene(World.DefaultGameObjectInjectionWorld.Unmanaged, scenes[i], SceneSystem.UnloadParameters.DestroyMetaEntities);
-                // }
-                // World.DisposeAllWorlds(); // Dispose all world
-                // SceneManager.LoadScene("NormalScene");
             }
         });
         

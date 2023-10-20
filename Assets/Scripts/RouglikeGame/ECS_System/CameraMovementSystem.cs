@@ -16,8 +16,8 @@ public partial class CameraMovementSystem : SystemBase
             float3 position = playerComponent.ValueRW.position;
             GameObject camera = Camera.main.gameObject;
             if (camera == null) return;
-            CameraComponent cameraComponent = SystemAPI.GetSingleton<CameraComponent>();
-            camera.transform.position = position + cameraComponent.offset;
+            if(SystemAPI.TryGetSingleton<CameraComponent>(out CameraComponent cameraComponent))
+                camera.transform.position = position + cameraComponent.offset;
         }
     }
 }

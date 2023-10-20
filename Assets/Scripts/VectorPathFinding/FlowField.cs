@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Entities;
+using System;
 
-public class FlowField 
+public class FlowField : IDisposable
 {
     public Cell[,] Grid { get; private set; }
     public Vector2Int GridSize { get; private set; }
@@ -158,15 +159,21 @@ public class FlowField
 
     public Vector3 GetRandomCellPosition()
     {
-        int randX = Random.Range(0, GridSize.x);
-        int randY = Random.Range(0, GridSize.y);
+        int randX = UnityEngine.Random.Range(0, GridSize.x);
+        int randY = UnityEngine.Random.Range(0, GridSize.y);
         Cell randCell = Grid[randX, randY];
         while(randCell.bestCost == ushort.MaxValue)
         {
-            randX = Random.Range(0, GridSize.x);
-            randY = Random.Range(0, GridSize.y);
+            randX = UnityEngine.Random.Range(0, GridSize.x);
+            randY = UnityEngine.Random.Range(0, GridSize.y);
             randCell = Grid[randX, randY];
         }
         return randCell.worldPos;
+    }
+
+    public void Dispose()
+    {
+        Grid = null;
+        destinationCell = null;
     }
 }

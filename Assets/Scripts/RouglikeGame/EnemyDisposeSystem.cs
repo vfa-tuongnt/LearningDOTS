@@ -6,6 +6,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Burst;
 
+
 public partial class EnemyDisposeSystem : SystemBase
 {
     protected override void OnUpdate()
@@ -17,24 +18,23 @@ public partial class EnemyDisposeSystem : SystemBase
                 enemyTag.ValueRW.deadTimer += SystemAPI.Time.DeltaTime;
                 if (enemyTag.ValueRW.deadTimer >= enemyTag.ValueRW.deadDelay)
                 {
-                    EndInitializationEntityCommandBufferSystem endInitializationECBSystem = World.GetOrCreateSystemManaged<EndInitializationEntityCommandBufferSystem>();
+                    BeginInitializationEntityCommandBufferSystem beginInitSystem = World.GetOrCreateSystemManaged<BeginInitializationEntityCommandBufferSystem>();
 
-                    EntityCommandBuffer.ParallelWriter entityParallelBuffer = endInitializationECBSystem.CreateCommandBuffer().AsParallelWriter();
+                    EntityCommandBuffer.ParallelWriter entityParallelBuffer = beginInitSystem.CreateCommandBuffer().AsParallelWriter();
 
-                    JobHandle DisposeJob = new DisposeEnemyJob
+                    this.Dependency = new DisposeEnemyJob
                     {
                         enemy = enemyTag.ValueRW.parent,
                         parallelWriter = entityParallelBuffer
                     }.Schedule(this.Dependency);
-                    endInitializationECBSystem.AddJobHandleForProducer(DisposeJob);
-                    DisposeJob.Complete();
+                    this.Dependency.Complete();
                 }
             }
         }
     }
 
     [BurstCompile]
-    public struct DisposeEnemyJob : IJob
+    public partial struct DisposeEnemyJob : IJobEntity
     {
         public Entity enemy;
         public EntityCommandBuffer.ParallelWriter parallelWriter;

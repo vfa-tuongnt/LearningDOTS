@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,6 +24,7 @@ public class GridController : MonoBehaviour
 
     private void InitializedFlowField()
     {
+        curFlowField?.Dispose();
         curFlowField = new FlowField(cellRadius, gridSize);
         curFlowField.CreateGrid();
         gridDebug.SetFlowField(curFlowField);
@@ -36,7 +39,6 @@ public class GridController : MonoBehaviour
     void Start()
     {
         InitializedFlowField();
-        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
     }
     
     void Update()
@@ -60,42 +62,53 @@ public class GridController : MonoBehaviour
     public void UpdateTargetPos()
     {
         delayTimer += Time.deltaTime;
-        if(entityManager == null) return;
+
+        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
         EntityQuery entityQuery = entityManager.CreateEntityQuery(typeof(TargetPositionComponent));
         NativeArray<Entity> entityArray = entityQuery.ToEntityArray(Allocator.Temp);
-
-        Entity target = entityArray[0];
-        TargetPositionComponent targetPositionComponent = entityManager.GetComponentData<TargetPositionComponent>(target);
-
-        Cell desCell = curFlowField.GetCellFromWorldPos(targetPositionComponent.targetPosition);
-        if (desCell.worldPos != prePos || prePos == null)
+        if (entityArray.Count() > 0)
         {
-            if(delayTimer >= 0.2f)
+            Entity target = entityArray[0];
+            TargetPositionComponent targetPositionComponent = entityManager.GetComponentData<TargetPositionComponent>(target);
+
+            Cell desCell = curFlowField.GetCellFromWorldPos(targetPositionComponent.targetPosition);
+            if (desCell.worldPos != prePos || prePos == null)
             {
-                SetTarget(targetPositionComponent.targetPosition);
-                delayTimer = 0;
+                if (delayTimer >= 0.2f)
+                {
+                    SetTarget(targetPositionComponent.targetPosition);
+                    delayTimer = 0;
+                }
             }
         }
+        entityArray.Dispose();
+        entityQuery.Dispose();
     }
 
     public void UpdateUnitDirection()
     {
-        if(entityManager == null)
-            entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
         EntityQuery unitQuery = entityManager.CreateEntityQuery(typeof(UnitPositionComponent));
         NativeArray<Entity> units = unitQuery.ToEntityArray(Allocator.Temp);
-        foreach(Entity unit in units)
+        if (units.Count() > 0)
         {
-            float3 unitPosition = entityManager.GetComponentData<UnitPositionComponent>(unit).position;
-            Cell unitCell = curFlowField.GetCellFromWorldPos(unitPosition);
-            Vector2Int moveDir = unitCell.bestDirection.Vector;
-            entityManager.SetComponentData(unit, new UnitPositionComponent
+            foreach (Entity unit in units)
             {
-                position = unitPosition,
-                direction = moveDir
-            });
+                LocalTransform unitLocalTransform = entityManager.GetComponentData<LocalTransform>(unit);
+                float3 unitPosition = unitLocalTransform.Position;
+
+                UnitPositionComponent unitPositionComponent = entityManager.GetComponentData<UnitPositionComponent>(unit);
+                Cell unitCell = curFlowField.GetCellFromWorldPos(unitPosition);
+                Vector2Int moveDir = unitCell.bestDirection.Vector;
+                unitPositionComponent.direction = moveDir;
+
+                Debug.Log("GridController Mono enemyPosition: " + unitLocalTransform.Position);
+                entityManager.SetComponentData(unit, unitPositionComponent);
+            }
         }
+        units.Dispose();
+        unitQuery.Dispose();
     }
 }

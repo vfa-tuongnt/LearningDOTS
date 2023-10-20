@@ -10,13 +10,12 @@ public partial class FlowFieldECS : SystemBase
 {
     GridController gridController;
     float3 playerPosition;
-    float timeDelay;
-    float deltaTime;
 
     protected override void OnUpdate()
     {
         Entities.ForEach((ref TargetPositionComponent target, ref LocalTransform localTransform) =>
         {
+            // Debug.Log("ECS: FlowFieldECS");
             target.targetPosition = localTransform.Position;
         }).ScheduleParallel();
     }

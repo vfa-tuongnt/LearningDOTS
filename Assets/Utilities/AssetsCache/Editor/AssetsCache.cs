@@ -517,7 +517,7 @@ namespace Utilities.AssetsCache
                         CacheObjectLocation location = CacheObjectLocation.Assets;
                         if (currentPrefab != null)
                         {
-                            item.prefabPath = currentPrefab.prefabAssetPath;
+                            item.prefabPath = currentPrefab.assetPath;
                             item.location = CacheObjectLocation.Prefab;
                         }
                         else

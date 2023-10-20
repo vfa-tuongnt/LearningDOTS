@@ -11,18 +11,6 @@ using Unity.Collections;
 
 public partial class PlayerUpdateSystem : SystemBase
 {
-    private float attackCooldown = 0.75f;
-    private float attackRange = 5f;
-    private float attackDuration = 1.25f;
-    private bool isAttacking;
-    private float nextAttackTime;
-    private float nextAttackEndTime;
-
-    protected override void OnStartRunning()
-    {
-        nextAttackTime = (float) SystemAPI.Time.ElapsedTime + attackCooldown;
-    }
-
     protected override void OnUpdate()
     {
         // Loop all the enemy to get the direction to the closest one
@@ -35,7 +23,6 @@ public partial class PlayerUpdateSystem : SystemBase
         float closestDistance = 100f;
         float3 dir = new Vector3();
 
-        EntityCommandBuffer endBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
         if(SystemAPI.TryGetSingletonRW<PlayerComponent>(out RefRW<PlayerComponent> playerComponent))
         {
             foreach(ECS_Player_Transform_Aspect playerTransformAspect in SystemAPI.Query<ECS_Player_Transform_Aspect>())
@@ -45,7 +32,9 @@ public partial class PlayerUpdateSystem : SystemBase
                     if(enemyAnimation.ValueRW.isDead == true) continue;
 
                     float distance = math.distance(enemyTransformAspect._localTransform.ValueRW.Position, playerTransformAspect._localTransform.ValueRW.Position);
+
                     float3 enemyDir = math.normalize(enemyTransformAspect._localTransform.ValueRW.Position - playerTransformAspect._localTransform.ValueRW.Position);
+                    
                     if(distance < closestDistance) 
                     {
                         closestDistance = distance;

@@ -17,7 +17,7 @@ public partial class SwordCastSystem : SystemBase
     private float attackCooldown = 0.12f;
     private float attackRange = 1f;
     private float attackPrepare = 0f;
-    private bool isAttacking;
+    // private bool isAttacking;
     private float nextAttackTime;
     private float nextAttackEndTime;
 
@@ -38,9 +38,12 @@ public partial class SwordCastSystem : SystemBase
     {
         nextAttackTime = (float)SystemAPI.Time.ElapsedTime;
         nextAttackTime += attackCooldown + attackPrepare; // prepare for attack and after attack
-        isAttacking = true;
+        // isAttacking = true;
 
-        RefRW<PlayerComponent> playerComponent = SystemAPI.GetSingletonRW<PlayerComponent>();
+        if (!SystemAPI.TryGetSingletonRW<PlayerComponent>(out RefRW<PlayerComponent> playerComponent))
+        {
+            return;
+        }
         float3 playerFaceDir = playerComponent.ValueRW.faceDirection;
 
         //TODO: Create a sphere collision 
@@ -56,14 +59,18 @@ public partial class SwordCastSystem : SystemBase
         CollisionWorld collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
         
         // Cast and check sphere collision 
+
+        if (!SystemAPI.TryGetSingletonRW<RandomComponent>(out RefRW<RandomComponent> randomComponent))
+        {
+            return;
+        }
+
         NativeList<ColliderCastHit> hits = new NativeList<ColliderCastHit>(Allocator.Temp);
 
         bool isHit = collisionWorld.SphereCastAll(origin, radius, direction, maxDistance, ref hits, filter);
 
-
-        EntityCommandBuffer endCommandBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
-        RefRW<RandomComponent> randomComponent = SystemAPI.GetSingletonRW<RandomComponent>();
         Unity.Mathematics.Random random = randomComponent.ValueRW.random;
+
         float _animationDelay = randomComponent.ValueRW.random.NextFloat(.1f, .5f);
         float _deadDelay = _animationDelay + 0.3f;
 
@@ -72,6 +79,7 @@ public partial class SwordCastSystem : SystemBase
             foreach(var hit in hits)
             {
                 RefRW<EnemyAnimateComponent> enemy = SystemAPI.GetComponentRW<EnemyAnimateComponent>(hit.Entity); 
+                
                 enemy.ValueRW.isDead = true; 
                 enemy.ValueRW.animationID = AnimationIdsGhoulZombie.Death; 
                 EntityManager.RemoveComponent<PhysicsCollider>(hit.Entity);
@@ -80,7 +88,7 @@ public partial class SwordCastSystem : SystemBase
                 enemyTag.ValueRW.animationDelay = _animationDelay;
                 enemyTag.ValueRW.deadDelay = _deadDelay;
             }
-            hits.Dispose();
         } 
+        hits.Dispose();
     }
 }

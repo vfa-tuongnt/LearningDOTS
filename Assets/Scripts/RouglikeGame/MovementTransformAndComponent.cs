@@ -28,6 +28,7 @@ public readonly partial struct MovementTransformAndComponent : IAspect
 
         float3 dir = unitPositionComponent.ValueRW.direction.ToFloat3XZ();
         FaceToTarget(dir);
+        // Debug.Log("ECS MovementTransformAndComponent: " + dir);
         
         physicVelocity.ValueRW.Linear = dir * movementComponent.ValueRO.speed;
         unitPositionComponent.ValueRW.position = transform.ValueRW.Position;
@@ -46,15 +47,6 @@ public readonly partial struct MovementTransformAndComponent : IAspect
 
         }
     }
-
-    // public void DestroySelf()
-    // {
-    //     EntityCommandBuffer endBuffer = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
-    //         .CreateCommandBuffer(World.DefaultGameObjectInjectionWorld.Unmanaged);
-
-    //     endBuffer.DestroyEntity(entity);
-    //     endBuffer.Dispose();
-    // }
 
     public void FaceToTarget(float3 dir)
     {

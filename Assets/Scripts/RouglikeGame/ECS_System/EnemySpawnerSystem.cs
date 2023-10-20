@@ -4,7 +4,6 @@ using UnityEngine;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Collections;
 using Unity.Transforms;
 using Unity.Jobs;
 
@@ -39,38 +38,42 @@ public partial class EnemySpawnerSystemEntity : SystemBase
     public RefRW<RandomComponent> randomComponent;
     public RefRW<EnemySpawnerComponent> enemySpawnerComponent;
     float3 _playerPosition = new float3(0, 0, 0);
-    FlowField flowField;
-
-    protected override void OnCreate()
-    {
-    }
+    FlowField _flowField;
+    private bool _isSetup;
 
     protected override void OnUpdate()
     {
-        if(Input.GetKeyDown(KeyCode.Alpha1))
+        if(RightPad.Instance != null && _isSetup == false)
         {
-            flowField = GridController.Instance.curFlowField;
-            enemySpawnerComponent = SystemAPI.GetSingletonRW<EnemySpawnerComponent>();
+            _isSetup = true;
+            RightPad.OnClick += Spawn5Enemy;
+        }
+    }
 
-            EntityCommandBuffer beginBuffer = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(World.Unmanaged);
+    private void Spawn5Enemy()
+    {
+        _flowField = GridController.Instance.curFlowField;
+        if(!SystemAPI.TryGetSingletonRW<EnemySpawnerComponent>(out enemySpawnerComponent))
+        {
+            return;
+        }
 
-            BeginInitializationEntityCommandBufferSystem beginInitializationECBSystem = World.GetOrCreateSystemManaged<BeginInitializationEntityCommandBufferSystem>();
+        BeginInitializationEntityCommandBufferSystem beginInitializationECBSystem = World.GetOrCreateSystemManaged<BeginInitializationEntityCommandBufferSystem>();
 
-            EntityCommandBuffer.ParallelWriter entityParallelBuffer = beginInitializationECBSystem.CreateCommandBuffer().AsParallelWriter();
-            for (int i = 0; i < 5; i++)
+        EntityCommandBuffer.ParallelWriter entityParallelBuffer = beginInitializationECBSystem.CreateCommandBuffer().AsParallelWriter();
+        for (int i = 0; i < 5; i++)
+        {
+            float3 newPosition = _flowField.GetRandomCellPosition();
+            newPosition.y = 0;
+
+            JobHandle SpawnJob = new SpawnEnemyJob
             {
-                float3 newPosition = flowField.GetRandomCellPosition();
-                newPosition.y = 0;
-
-                JobHandle SpawnJob = new SpawnEnemyJob
-                {
-                    beginBuffer = entityParallelBuffer,
-                    enemyPrefab = enemySpawnerComponent.ValueRW._enemyPrefab,
-                    position = newPosition
-                }.Schedule(this.Dependency);
-                beginInitializationECBSystem.AddJobHandleForProducer(SpawnJob);
-                SpawnJob.Complete();
-            }
+                beginBuffer = entityParallelBuffer,
+                enemyPrefab = enemySpawnerComponent.ValueRW._enemyPrefab,
+                position = newPosition
+            }.Schedule(this.Dependency);
+            beginInitializationECBSystem.AddJobHandleForProducer(SpawnJob);
+            SpawnJob.Complete();
         }
     }
 
