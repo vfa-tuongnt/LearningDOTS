@@ -57,7 +57,7 @@ public class FlowField : IDisposable
             bool hasIncreasedCost = false;
             foreach (Collider col in obstacles)
             {
-                if (col.gameObject.layer == 6 || col.gameObject.layer == 8) // Walls or Enemy
+                if (col.gameObject.layer == 6) // Walls 
                 {
                     curCell.IncreaseCost(255);
                     continue;

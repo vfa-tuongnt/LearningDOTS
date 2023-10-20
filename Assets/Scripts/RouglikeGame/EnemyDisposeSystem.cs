@@ -1,16 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.Physics;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Burst;
+using Unity.Collections;
 
 
 public partial class EnemyDisposeSystem : SystemBase
 {
     protected override void OnUpdate()
     {
+        List<Entity> deadEnemy = new List<Entity>();
+
         foreach((RefRW<EnemyTag> enemyTag, RefRW<EnemyAnimateComponent> enemyAnimateComponent) in SystemAPI.Query<RefRW<EnemyTag>, RefRW<EnemyAnimateComponent>>()) 
         {
             if (enemyAnimateComponent.ValueRW.isDead == true)
@@ -26,7 +28,7 @@ public partial class EnemyDisposeSystem : SystemBase
                     {
                         enemy = enemyTag.ValueRW.parent,
                         parallelWriter = entityParallelBuffer
-                    }.Schedule(this.Dependency);
+                    }.ScheduleParallel(this.Dependency);
                     this.Dependency.Complete();
                 }
             }

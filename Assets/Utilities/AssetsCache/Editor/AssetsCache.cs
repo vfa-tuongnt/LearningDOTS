@@ -514,7 +514,7 @@ namespace Utilities.AssetsCache
                         };
                         item.SetDisplayName();
 
-                        CacheObjectLocation location = CacheObjectLocation.Assets;
+                        // CacheObjectLocation location = CacheObjectLocation.Assets;
                         if (currentPrefab != null)
                         {
                             item.prefabPath = currentPrefab.assetPath;

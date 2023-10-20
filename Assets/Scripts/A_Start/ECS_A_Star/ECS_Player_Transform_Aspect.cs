@@ -13,12 +13,14 @@ public readonly partial struct ECS_Player_Transform_Aspect : IAspect
     public readonly RefRW<PlayerTag> _playerTag;
     public readonly RefRW<LocalTransform> _localTransform;
     public readonly RefRW<PlayerMovementComponent> _playerMovementComponent;
+    public readonly RefRW<PlayerComponent> _playerComponent;
 
     public void Move(float deltaTime)
     {
         float speed = _playerMovementComponent.ValueRW.speed;
         float2 movement = _playerMovementComponent.ValueRW.movement;
         _localTransform.ValueRW.Position += movement.ToFloat3XZ() * speed * deltaTime;
+        _playerComponent.ValueRW.position = _localTransform.ValueRW.Position;
     }
 
     public void FaceToTargetPos(float3 target)

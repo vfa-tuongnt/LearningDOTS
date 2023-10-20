@@ -14,7 +14,7 @@ public readonly partial struct MovementTransformAndComponent : IAspect
     public readonly RefRW<LocalTransform> transform;
     public readonly RefRW<EnemyMovementComponent> movementComponent;
     public readonly RefRW<UnitPositionComponent> unitPositionComponent;
-    public readonly RefRW<PhysicsVelocity> physicVelocity;
+    // public readonly RefRW<PhysicsVelocity> physicVelocity;
 
 
     public void Move(float deltaTime)
@@ -28,15 +28,14 @@ public readonly partial struct MovementTransformAndComponent : IAspect
 
         float3 dir = unitPositionComponent.ValueRW.direction.ToFloat3XZ();
         FaceToTarget(dir);
-        // Debug.Log("ECS MovementTransformAndComponent: " + dir);
-        
-        physicVelocity.ValueRW.Linear = dir * movementComponent.ValueRO.speed;
+
+        transform.ValueRW.Position += dir * movementComponent.ValueRO.speed * deltaTime;
         unitPositionComponent.ValueRW.position = transform.ValueRW.Position;
     }
 
     public void Stop()
     {
-        physicVelocity.ValueRW.Linear = new float3(0, 0, 0);
+        // physicVelocity.ValueRW.Linear = new float3(0, 0, 0);
     }
 
     public void CheckReachTarget()

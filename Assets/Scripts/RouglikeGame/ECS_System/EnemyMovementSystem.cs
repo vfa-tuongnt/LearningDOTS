@@ -12,19 +12,21 @@ public partial class EnemyMovementSystem : SystemBase
 
     protected override void OnStartRunning()
     {
-        Entities.ForEach((Entity entity, ref LocalTransform localTransform) =>
-        {
-            if(SystemAPI.HasComponent<PlayerTag>(entity))
-            {
-                _playerPosition = localTransform.Position;
-                _isRunnable = true;
-            }
-        }).WithoutBurst().Run();
     }
 
     protected override void OnUpdate()
     {
-        if (_isRunnable == false) return;
+        if (_isRunnable == false)
+        {
+            if(SystemAPI.TryGetSingleton<PlayerComponent>(out PlayerComponent playerComponent))
+            {
+                _playerPosition = playerComponent.position;
+                _isRunnable = true;
+            }
+            return;
+        }
+
+        Debug.Log("Move Enemy");
         foreach((MovementTransformAndComponent movementTransformAndComponent, RefRW<EnemyAnimateComponent> enemyAnimateComponent) in SystemAPI.Query<MovementTransformAndComponent, RefRW<EnemyAnimateComponent>>())
         {
             if(enemyAnimateComponent.ValueRW.isDead == true)

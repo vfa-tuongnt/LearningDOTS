@@ -104,7 +104,8 @@ public class GridController : MonoBehaviour
                 Vector2Int moveDir = unitCell.bestDirection.Vector;
                 unitPositionComponent.direction = moveDir;
 
-                Debug.Log("GridController Mono enemyPosition: " + unitLocalTransform.Position);
+                Debug.Log("Unit: " + unit.Index + "MoveDir: " + moveDir);
+
                 entityManager.SetComponentData(unit, unitPositionComponent);
             }
         }
